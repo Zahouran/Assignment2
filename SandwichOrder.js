@@ -21,6 +21,7 @@ module.exports = class SandwichOrder extends Order{
         this.sSides = "";
         this.sItem = "sandwich";
         this.sTotal = 0;
+        this.sAddress = "";
     }
     handleInput(sInput){
         let aReturn = [];
@@ -37,23 +38,26 @@ module.exports = class SandwichOrder extends Order{
                     this.sChoice = sInput;
                     aReturn.push("What type of bread would you like?");
                     aReturn.push("Bagel, Baguette, Multigrain, Croissant");
-                    break;
                 }
-                if(sInput.toLowerCase() == "custom"){
+                else if(sInput.toLowerCase() == "custom"){
                     this.stateCur = OrderState.TYPE
                     this.sChoice = sInput;
                     aReturn.push("What type of bread would you like?");
                     aReturn.push("Bagel, Baguette, Multigrain, Croissant");
-                    break;
                 }
+                else{
+                  aReturn.push("Would you like a premade sandwich or custom?");
+                  aReturn.push("Enter premade or custom");
+                }
+                break;
             case OrderState.TYPE:
+              if(sInput.toLowerCase() == "bagel" || sInput.toLowerCase() == "baguette" || sInput.toLowerCase() == "multigrain" || sInput.toLowerCase() == "croissant"){
                 if(this.sChoice.toLowerCase() == "premade"){
                     this.stateCur = OrderState.TOPPINGS
                     this.sType = sInput;
                     aReturn.push("What sandwich would you like?");
                     aReturn.push("Scramble, BBQ, Teriyaki, Veggietable");
                     this.sTotal += 4;
-                    break;
                 }
                 if(this.sChoice.toLowerCase() == "custom"){
                     this.stateCur = OrderState.TOPPINGS
@@ -61,29 +65,56 @@ module.exports = class SandwichOrder extends Order{
                     aReturn.push("Pick up to 4 toppings:");
                     aReturn.push("Tomato, Spinach, Baked Tofu, Avocado, Pickled Onion, Roasted Garlic, Mushroom,");
                     this.sTotal += 5;
-                    break;
                 }
+              }
+              else{
+                aReturn.push("What type of bread would you like?");
+                aReturn.push("Bagel, Baguette, Multigrain, Croissant");
+              }
+              break;
             case OrderState.TOPPINGS:
-                this.stateCur = OrderState.SIDES
-                this.sToppings = sInput;
-                aReturn.push("Whould you like a side with that? The soup of the day is Cauliflower Curry");
-                aReturn.push("Fries, Onion Rings, Ceasar Salad, Soup of the Day, none");
-                break;
-            case OrderState.SIDES:  
-                this.stateCur = OrderState.DRINKS
-                if(sInput.toLowerCase() != "none"){
-                    this.sSides = sInput;
-                    this.sTotal += 3;
+              if(this.sChoice.toLowerCase() == "premade"){
+                if(sInput.toLowerCase() == "scramble" || sInput.toLowerCase() == "bbq" || sInput.toLowerCase() == "teriyaki" || sInput.toLowerCase() == "veggietable"){
+                  this.stateCur = OrderState.SIDES
+                  this.sToppings = sInput;
+                  aReturn.push("Whould you like a side with that? The soup of the day is Cauliflower Curry");
+                  aReturn.push("Fries, Onion Rings, Ceasar Salad, Soup, none");
                 }
+                else{
+                  aReturn.push("What sandwich would you like?");
+                  aReturn.push("Scramble, BBQ, Teriyaki, Veggietable");
+                }
+              }
+              else{
+                  this.stateCur = OrderState.SIDES
+                  this.sToppings = sInput;
+                  aReturn.push("Whould you like a side with that? The soup of the day is Cauliflower Curry");
+                  aReturn.push("Fries, Onion Rings, Ceasar Salad, Soup, none");
+              }
+              break;
+            case OrderState.SIDES:  
+              if(sInput.toLowerCase() == "fries" || sInput.toLowerCase() == "onion rings" || sInput.toLowerCase() == "ceasar salad" || sInput.toLowerCase() == "soup"){
+                this.stateCur = OrderState.DRINKS
+                this.sSides = sInput;
+                this.sTotal += 3;
                 aReturn.push("What drink would you like with that?");
                 aReturn.push("Orangina, SevenUp, DrPepper, water, none");
-                break;
+              }
+              else if(sInput.toLowerCase() == "none"){
+                this.stateCur = OrderState.DRINKS
+                aReturn.push("What drink would you like with that?");
+                aReturn.push("Orangina, SevenUp, DrPepper, water, none");
+              }
+              else{
+                aReturn.push("Whould you like a side with that? The soup of the day is Cauliflower Curry");
+                aReturn.push("Fries, Onion Rings, Ceasar Salad, Soup, none");
+              }
+              break;
             case OrderState.DRINKS:
+              if(sInput.toLowerCase() == "orangina" || sInput.toLowerCase() == "sevenup" || sInput.toLowerCase() == "drpepper" || sInput.toLowerCase() == "water"){
                 this.stateCur = OrderState.PAYMENT;
-                if(sInput.toLowerCase() != "none"){
-                    this.sDrinks = sInput;
-                    this.sTotal += 2;
-                }
+                this.sDrinks = sInput;
+                this.sTotal += 2;
                 aReturn.push("Thank-you for your order of");
                 if(this.sChoice.toLowerCase() == "premade"){
                     aReturn.push(`The ${this.sToppings} ${this.sItem} in ${this.sType}`);
@@ -91,19 +122,45 @@ module.exports = class SandwichOrder extends Order{
                 if(this.sChoice.toLowerCase() == "custom"){
                     aReturn.push(`${this.sType} ${this.sItem} with ${this.sToppings}`);
                 }
-                aReturn.push(`with ${this.sSides}`);
+                if(this.sSides){
+                  aReturn.push(`with ${this.sSides}`);
+                }
                 if(this.sDrinks){
                     aReturn.push(`and with ${this.sDrinks}`);
                 }
                 aReturn.push(`This will cost $${this.sTotal}`);
                 aReturn.push(`Please pay for your order here`);
                 aReturn.push(`${this.sUrl}/payment/${this.sNumber}/`);
-                break;
+              }
+              else if(sInput.toLowerCase() == "none"){
+                this.stateCur = OrderState.PAYMENT;
+                aReturn.push("Thank-you for your order of");
+                if(this.sChoice.toLowerCase() == "premade"){
+                    aReturn.push(`The ${this.sToppings} ${this.sItem} in ${this.sType}`);
+                }
+                if(this.sChoice.toLowerCase() == "custom"){
+                    aReturn.push(`${this.sType} ${this.sItem} with ${this.sToppings}`);
+                }
+                if(this.sSides){
+                  aReturn.push(`with ${this.sSides}`);
+                }
+                if(this.sDrinks){
+                    aReturn.push(`and with ${this.sDrinks}`);
+                }
+                aReturn.push(`This will cost $${this.sTotal}`);
+                aReturn.push(`Please pay for your order here`);
+                aReturn.push(`${this.sUrl}/payment/${this.sNumber}/`);
+              }
+              else{
+                aReturn.push("What drink would you like with that?");
+                aReturn.push("Orangina, SevenUp, DrPepper, water, none");
+              }
+              break;
             case OrderState.PAYMENT:
                 this.isDone(true);
                 let d = new Date();
                 d.setMinutes(d.getMinutes() + 20);
-                aReturn.push(`Please pick it up at our Restaurant on 50 William Street West Waterloo N1G 0E3 at ${d.toTimeString()}`);
+                aReturn.push(`Please pick it up at ${this.sAddress}our Restaurant on 50 William Street West Waterloo N1G 0E3 at ${d.toTimeString()}`);
                 break;
         }
         return aReturn;
