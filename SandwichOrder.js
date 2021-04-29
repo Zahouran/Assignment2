@@ -167,7 +167,7 @@ module.exports = class SandwichOrder extends Order{
     }
     renderForm(){
       // your client id should be kept private
-      const sClientID = process.env.SB_CLIENT_ID || 'put your client id here for testing ... Make sure that you delete it before committing'
+      const sClientID = process.env.SB_CLIENT_ID || 'Af5T4eHV4fMqlxy0rWMfFltbKPR2qjquK4iZ6C2aQ99cU_fH_g8fYg3W7Qkfu03rDsaeIQXgoMiW365z'
       return(`
       <!DOCTYPE html>
   
